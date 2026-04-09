@@ -698,6 +698,7 @@ class Neurons:
         chosen_neurons="all",
         fps=15,
         speed_up=1,
+        hold=0, # in seconds
         progress_bar=False,
         autosave=None,
         **kwargs,
@@ -713,6 +714,7 @@ class Neurons:
             • chosen_neurons: Which neurons to plot. string "10" or 10 will plot ten of them, "all" will plot all of them, "12rand" will plot 12 random ones. A list like [1,4,5] will plot cells indexed 1, 4 and 5. Defaults to "all".
             • fps: frames per second of end video. Defaults to 15.
             • speed_up: #times real speed animation should come out at. Defaults to 1.
+            • hold: time to hold the final frame for in seconds. Defaults to 0.
             • progress_bar: if True, a progress bar will be shown as the animation is created. Default to False.
 
 
@@ -757,9 +759,16 @@ class Neurons:
         )
 
         frames = int((t_end - t_start) / (dt * speed_up))
+
+        if hold:
+            hold_n = int(hold * fps)
+            frames = np.concatenate([np.arange(frames), np.repeat(frames - 1, hold_n)])
+        else:
+            frames = range(frames)
+
         if progress_bar:
             from tqdm import tqdm
-            frames = tqdm(range(frames), position=0, leave=True)
+            frames = tqdm(frames, position=0, leave=True)
 
         from matplotlib import animation
 
