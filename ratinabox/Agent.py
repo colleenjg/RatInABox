@@ -843,6 +843,7 @@ class Agent:
         t_end=None, 
         fps=15, 
         speed_up=5, #by default the animation is 5x faster than real time 
+        hold=0, # in seconds
         progress_bar=False,
         autosave=None, 
         **kwargs
@@ -853,6 +854,7 @@ class Agent:
             t_end (_type_, optional): _description_. Defaults to None.
             fps: frames per second of end video
             speed_up: #times real speed animation should come out at
+            hold (float): time to hold the final frame for in seconds. Defaults to 0.
             progress_bar (bool): if True, a progress bar will be shown as the animation is created. Defaults to False.
             autosave (bool): whether to automatical try and save this. Defaults to None in which case looks for global constant ratinabox.autosave_plots
             kwargs: passed to trajectory plotting function (chuck anything you wish in here). A particularly useful kwarg is 'additional_plot_func': any function which takes a fig, ax and t as input. The animation wll be passed through this each time after plotting the trajectory, use it to modify your animations however you like
@@ -898,9 +900,16 @@ class Agent:
         )
 
         frames = int((t_end - t_start) / (dt * speed_up))
+
+        if hold:
+            hold_n = int(hold * fps)
+            frames = np.concatenate([np.arange(frames), np.repeat(frames - 1, hold_n)])
+        else:
+            frames = range(frames)
+
         if progress_bar:
             from tqdm import tqdm
-            frames = tqdm(range(frames), position=0, leave=True)
+            frames = tqdm(frames, position=0, leave=True)
 
         from matplotlib import animation
 
